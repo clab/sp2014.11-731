@@ -1,0 +1,23 @@
+#!/bin/bash
+
+which python &> /dev/null
+if [ $? -ne 0 ] ; then
+  echo Cannot find python in your path!
+  exit 1
+fi
+(python --version 2>&1) | perl -e '$_=<>; exit 0 if /2\.7\.\d+$/; exit 1;'
+if [ $? -ne 0 ] ; then
+  echo Incorrect version of Python in your path!
+  exit 1
+fi
+
+python -c 'import yaml' &> /dev/null
+if [ $? -ne 0 ] ; then
+  echo PyYAML is not properly installed - scripts may not function
+  echo   Go to http://pyyaml.org/ for more information.
+  exit 1
+else
+  echo Everything checks out!
+  exit 0
+fi
+
