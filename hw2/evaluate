@@ -22,7 +22,7 @@ def compute_tau(rank, scores):
   return (True, num / denom)
 
 argparser = argparse.ArgumentParser(prog='fit')
-argparser.add_argument('-y', '--labels', dest='labels', default='data/cs-en.dev.rankings', help='Reference rankings')
+argparser.add_argument('-y', '--labels', dest='labels', default='data/en-cs.dev.rankings', help='Reference rankings')
 
 args = argparser.parse_args()
 

@@ -12,7 +12,7 @@ def extract_features(hyp, ref):
   return {'prec':precision}
 
 argparser = argparse.ArgumentParser(prog='extract')
-argparser.add_argument('-x', '--pairs', dest='pairs', default='data/cs-en.pairs', help='Reference-Hypothesis pairs')
+argparser.add_argument('-x', '--pairs', dest='pairs', default='data/en-cs.pairs', help='Reference-Hypothesis pairs')
 
 args = argparser.parse_args()
 

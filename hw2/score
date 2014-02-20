@@ -12,7 +12,7 @@ def dot(a, b):
   return p
 
 argparser = argparse.ArgumentParser(prog='score')
-argparser.add_argument('-x', '--pairs', dest='pairs', default='data/cs-en.pairs', help='Reference-Hypothesis pairs')
+argparser.add_argument('-x', '--pairs', dest='pairs', default='data/en-cs.pairs', help='Reference-Hypothesis pairs')
 argparser.add_argument('-w', '--weights', dest='weights', required=True, help='Weights file')
 
 args = argparser.parse_args()

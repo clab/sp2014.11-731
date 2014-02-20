@@ -32,8 +32,8 @@ def neg(a):
 
 argparser = argparse.ArgumentParser(prog='fit')
 argparser.add_argument('-2', '--l2', dest='l2', default=0.0, help='L2 regularization strength')
-argparser.add_argument('-x', '--pairs', dest='pairs', default='data/cs-en.pairs', help='Reference-Hypothesis pairs')
-argparser.add_argument('-y', '--labels', dest='labels', default='data/cs-en.train.labels', help='Reference-H1-H2-Judgement labels')
+argparser.add_argument('-x', '--pairs', dest='pairs', default='data/en-cs.pairs', help='Reference-Hypothesis pairs')
+argparser.add_argument('-y', '--labels', dest='labels', default='data/en-cs.train.labels', help='Reference-H1-H2-Judgement labels')
 
 args = argparser.parse_args()
 
