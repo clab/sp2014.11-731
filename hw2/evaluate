@@ -5,20 +5,21 @@ import os, sys
 import json
 
 def compute_tau(rank, scores):
-  n = len(rank)
-  if n < 2: return (0.0, False)
-  num = 0.0
+  if len(rank) < 2: return (False, 0.0)
+  num, denom = (0.0, 0.0)
   for x in rank.keys():
     if x in scores:
-      n += 1
       for y in rank.keys():
         if y in scores:
           if (rank[x] > rank[y] and scores[x] > scores[y]) or (rank[x] < rank[y] and scores[x] < scores[y]):
             num += 1.0
+            denom += 1.0
           elif (rank[x] > rank[y] and scores[x] < scores[y]) or (rank[x] < rank[y] and scores[x] > scores[y]):
             num -= 1.0
-  denom = 0.5 * n * (n - 1.0)
-  return (num / denom, True)
+            denom += 1.0
+  if denom < 1.0:
+    return (False, 0.0)
+  return (True, num / denom)
 
 argparser = argparse.ArgumentParser(prog='fit')
 argparser.add_argument('-y', '--labels', dest='labels', default='data/cs-en.dev.rankings', help='Reference rankings')
@@ -32,7 +33,7 @@ for m_ref_hyp in sys.stdin:
   m, ref, hyp = m_ref_hyp.rstrip().split(' ||| ')
   scores[(ref, hyp)] = float(m)
 
-sys.stderr.write('Loading manual rankings judgements...\n')
+sys.stderr.write('Loading manual rankings...\n')
 curid = ''
 rank = {}
 tot_tau = 0.0
@@ -58,5 +59,4 @@ if valid:
 
 tau = tot_tau / tot_count
 print tau
-
 

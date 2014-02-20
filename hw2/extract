@@ -2,18 +2,14 @@
 
 import argparse
 import json
-import os, sys, math, re
-
-badchar = re.compile(ur'[\u0080-\ud7ff]')
+import os, sys, math
 
 def extract_features(hyp, ref):
   hwords = hyp.lower().split()
   rwords = ref.lower().split()
   refset = set(rwords)
-  tot = sum(1.0 for word in hwords if word in refset) / len(hwords)
-  lrat = math.fabs(len(rwords) - len(hwords)) / len(rwords)
-  bc = sum(1.0 for x in hwords if badchar.search(x))
-  return {'prec':tot, 'lratio':lrat, 'lprec':math.log(1.0 + tot), 'sprec':tot**2.0, 'llrat':math.log(1.0 + lrat), 'badchar':bc}
+  precision = sum(1.0 for word in hwords if word in refset) / len(hwords)
+  return {'prec':precision}
 
 argparser = argparse.ArgumentParser(prog='extract')
 argparser.add_argument('-x', '--pairs', dest='pairs', default='data/cs-en.pairs', help='Reference-Hypothesis pairs')

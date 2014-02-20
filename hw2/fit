@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import argparse
-import os, sys
+import os, sys, tempfile
 import subprocess
 import json
 
@@ -45,10 +45,10 @@ for (ref_hyp, fmap) in zip(open(args.pairs), sys.stdin):
 
 # load training judgements
 sys.stderr.write('Loading training judgements...\n')
-featsfile = 'train.feats'
-respfile = 'train.resp'
-f = open(featsfile, 'w')
-r = open(respfile, 'w')
+f = tempfile.NamedTemporaryFile(delete=False)
+featsfile = f.name
+r = tempfile.NamedTemporaryFile(delete=False)
+respfile = r.name
 lc = 1
 nofeats = 0
 for line in open(args.labels):
@@ -80,6 +80,8 @@ firstline = lines[0].split('\t')
 if firstline[1:] != ['***ORDINAL***', '0', '1', '2']:
   sys.stderr.write('Unexpected output in creg file!\n')
   sys.exit(1)
+os.unlink(featsfile)
+os.unlink(respfile)
 
 sys.stderr.write('Learned boundaries: %s\nWriting learned coefficients.\n' % str(lines[1:3]))
 weights = {}
