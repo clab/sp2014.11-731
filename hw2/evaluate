@@ -1,0 +1,62 @@
+#!/usr/bin/env python
+
+import argparse
+import os, sys
+import json
+
+def compute_tau(rank, scores):
+  n = len(rank)
+  if n < 2: return (0.0, False)
+  num = 0.0
+  for x in rank.keys():
+    if x in scores:
+      n += 1
+      for y in rank.keys():
+        if y in scores:
+          if (rank[x] > rank[y] and scores[x] > scores[y]) or (rank[x] < rank[y] and scores[x] < scores[y]):
+            num += 1.0
+          elif (rank[x] > rank[y] and scores[x] < scores[y]) or (rank[x] < rank[y] and scores[x] > scores[y]):
+            num -= 1.0
+  denom = 0.5 * n * (n - 1.0)
+  return (num / denom, True)
+
+argparser = argparse.ArgumentParser(prog='fit')
+argparser.add_argument('-y', '--labels', dest='labels', default='data/cs-en.dev.rankings', help='Reference rankings')
+
+args = argparser.parse_args()
+
+sys.stderr.write('Loading scores...\n')
+# load features extracted for each ref/hyp pair
+scores = {}
+for m_ref_hyp in sys.stdin:
+  m, ref, hyp = m_ref_hyp.rstrip().split(' ||| ')
+  scores[(ref, hyp)] = float(m)
+
+sys.stderr.write('Loading manual rankings judgements...\n')
+curid = ''
+rank = {}
+tot_tau = 0.0
+tot_count = 0.0
+for line in open(args.labels):
+  line = line.rstrip()
+  (id, r, ref, hyp) = line.split(' ||| ')
+  r = float(r)
+  if id != curid:
+    curid = id
+    if len(rank) > 1:
+      valid, tau = compute_tau(rank, scores)
+      if valid:
+        tot_tau += tau
+        tot_count += 1
+    rank = {}
+  rank[(ref, hyp)] = r
+
+valid, tau = compute_tau(rank, scores)
+if valid:
+  tot_tau += tau
+  tot_count += 1
+
+tau = tot_tau / tot_count
+print tau
+
+

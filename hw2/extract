@@ -1,0 +1,31 @@
+#!/usr/bin/env python
+
+import argparse
+import json
+import os, sys, math, re
+
+badchar = re.compile(ur'[\u0080-\ud7ff]')
+
+def extract_features(hyp, ref):
+  hwords = hyp.lower().split()
+  rwords = ref.lower().split()
+  refset = set(rwords)
+  tot = sum(1.0 for word in hwords if word in refset) / len(hwords)
+  lrat = math.fabs(len(rwords) - len(hwords)) / len(rwords)
+  bc = sum(1.0 for x in hwords if badchar.search(x))
+  return {'prec':tot, 'lratio':lrat, 'lprec':math.log(1.0 + tot), 'sprec':tot**2.0, 'llrat':math.log(1.0 + lrat), 'badchar':bc}
+
+argparser = argparse.ArgumentParser(prog='extract')
+argparser.add_argument('-x', '--pairs', dest='pairs', default='data/cs-en.pairs', help='Reference-Hypothesis pairs')
+
+args = argparser.parse_args()
+
+lc = 0
+sys.stderr.write('Extracting features for (ref,hyp) pairs from %s.\n' % args.pairs)
+# loop over all (ref,hyp) pairs in the input file and extract evaluation features
+for ref_hyp in open(args.pairs):
+  lc += 1
+  ref, hyp = ref_hyp.rstrip().split(' ||| ')
+  fmap = extract_features(hyp, ref)
+  print json.dumps(fmap)   # print evaluation feature map
+

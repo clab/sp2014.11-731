@@ -1,0 +1,45 @@
+#!/usr/bin/env python
+
+import argparse
+import os, sys
+import json
+
+def dot(a, b):
+  p = 0.0
+  for k,v in a.iteritems():
+    if k in b:
+      p += b[k] * v
+  return p
+
+argparser = argparse.ArgumentParser(prog='score')
+argparser.add_argument('-x', '--pairs', dest='pairs', default='data/cs-en.pairs', help='Reference-Hypothesis pairs')
+argparser.add_argument('-w', '--weights', dest='weights', required=True, help='Weights file')
+
+args = argparser.parse_args()
+
+with open(args.weights) as w:
+  weights = json.loads(w.readline())
+
+sys.stderr.write('WEIGHTS: %s\n' % str(weights))
+
+sys.stderr.write('Loading ref/hyp pairs from %s and features from STDIN and computing evaluation metric...\n' % args.pairs)
+# load features extracted for each ref/hyp pair
+scores = {}
+bestrh = None
+bestm = -99999.0
+worstm = 99999.0
+for (ref_hyp, fmap) in zip(open(args.pairs), sys.stdin):
+  rh = ref_hyp.rstrip()
+  m = dot(json.loads(fmap), weights)
+  print m,'|||',rh
+  scores[rh] = m
+  if m > bestm:
+    bestm = m
+    bestrh = rh
+  if m < worstm:
+    worstm = m
+    worstrh = rh
+sys.stderr.write('***Highest scoring hypothesis (m=%f):\n%s\n' % (bestm, bestrh))
+sys.stderr.write('*** Lowest scoring hypothesis (m=%f):\n%s\n' % (worstm, worstrh))
+
+
