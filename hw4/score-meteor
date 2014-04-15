@@ -1,0 +1,63 @@
+#!/bin/bash
+
+if [ $# -gt 0 ]; then
+  echo Usage: $0 \< hypothesis.txt 1>&2
+  exit 1
+fi
+
+JAVA=`which java`
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+if [ $? -gt 0 ]; then
+  echo Can\'t find java in your PATH 1>&2
+  exit 1
+fi
+
+METEOR_JAR=$DIR/meteor-1.4/meteor-1.4.jar
+if [ -f $METEOR_JAR ]; then
+  echo Using METEOR in $METEOR_JAR 1>&2
+else
+  echo Attempting to install from http://www.cs.cmu.edu/~alavie/METEOR/download/meteor-1.4.tgz 1>&2
+  WGET=`which wget`
+  if [ $? -gt 0 ]; then
+    CURL=`which curl`
+    if [ $? -gt 0 ]; then
+      echo Can\'t find wget or curl: please download METEOR tar file and unpack it in ./hw4 1>&2
+      exit 1
+    fi
+    $CURL http://www.cs.cmu.edu/~alavie/METEOR/download/meteor-1.4.tgz > $DIR/meteor-1.4.tgz
+  else
+    $WGET http://www.cs.cmu.edu/~alavie/METEOR/download/meteor-1.4.tgz --directory-prefix=$DIR
+  fi
+  if [ $? -gt 0 ]; then
+    echo Please download METEOR tar file and unpack it in ./hw4 1>&2
+    exit 1
+  fi
+  tar xzf $DIR/meteor-1.4.tgz --directory $DIR
+  rm -f $DIR/meteor-1.4.tgz
+  if [ -f $METEOR_JAR ]; then
+    echo Using METEOR in $METEOR_JAR 1>&2
+  else
+    echo METEOR install failed, please check directory permissions 1>&2
+    exit 1
+  fi
+fi
+
+TMPF=/tmp/tmp.$$
+SCOREF=/tmp/scoref.$$
+echo Reading hypothesis from STDIN... 1>&2
+cat > $TMPF
+LINES=`wc -l $TMPF | cut -f1 -d ' '`
+
+if [ $LINES -eq 800 ]; then
+  # change head to tail to score the blind test set #####
+  head -400 $TMPF > $SCOREF
+  $JAVA -Xmx1G -jar $METEOR_JAR $SCOREF $DIR/data/test.ref
+  rm -f $TMPF $SCORF
+else
+  echo Exepected 800 lines but got $LINES 1>&2
+  rm -f $TMPF $SCORF
+  exit 1
+fi
+
+
